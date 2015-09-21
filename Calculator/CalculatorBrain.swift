@@ -61,6 +61,41 @@ class CalculatorBrain {
         knownOps["√"] = Op.UnaryOperation("√", sqrt)
         variableValues["π"] = M_PI
     }
+
+    func getFunction() -> (Double -> Double)? {
+        var copyOps: [Op] = opStack
+        return getFunctions(&copyOps)
+    }
+    
+    private func getFunctions(inout ops: [Op]) -> (Double -> Double)? {
+        if !ops.isEmpty {
+            let op = ops.removeLast()
+            switch op {
+            case .Operand(let operand):
+                return {(m: Double) -> Double in return operand}
+            case .Variable(let variable):
+                return {(m: Double) -> Double in return m}
+            case .UnaryOperation(_, let unaryFunction):
+                if let resultFunc = getFunctions(&ops) {
+                    return {(m: Double) -> Double in return unaryFunction(resultFunc(m))}
+                } else {
+                    break
+                }
+            case .BinaryOperation(_, let binaryFunction):
+                if let lateResultFunc = getFunctions(&ops), earlyResultFunction = getFunctions(&ops) {
+                    return {(m: Double) -> Double in return binaryFunction(earlyResultFunction(m), lateResultFunc(m))}
+                } else {
+                    break
+                }
+            }
+        }
+        return nil
+    }
+    
+    func getFunctionDescription() -> String {
+        var copyOps: [Op] = opStack
+        return describe(&copyOps)
+    }
     
     private func describe(inout ops: [Op]) -> String {
         if !ops.isEmpty {

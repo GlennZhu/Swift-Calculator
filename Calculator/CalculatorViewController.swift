@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class CalculatorViewController: UIViewController {
     
     private var brain = CalculatorBrain()
 
@@ -145,5 +145,21 @@ class ViewController: UIViewController {
             brain.pushOperand(result, pushToHistory: false)
         }
         readyForNewNumber()
+    }
+    
+    // Graph
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        let destination = (segue.destinationViewController as? UINavigationController)?.visibleViewController
+        if let graphViewController = destination as? GraphViewController {
+            if let identifier = segue.identifier {
+                switch(identifier) {
+                case "graph" :
+                    graphViewController.setFunctionToDraw(brain.getFunction())
+                    graphViewController.showFunction(brain.getFunctionDescription())
+                default:
+                    break
+                }
+            }
+        }
     }
 }
